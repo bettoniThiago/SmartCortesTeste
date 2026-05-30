@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Barra</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #222;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      color: #e0e0e0;
+    }
+
+    .ihm {
+      background: #2e2e2e;
+      border: 2px solid #444;
+      border-radius: 6px;
+      padding: 18px;
+      width: 100%;
+      max-width: 680px;
+    }
+
+    .ihm-header {
+      background: #3a3a3a;
+      border-radius: 4px;
+      padding: 7px 14px;
+      font-size: 13px;
+      color: #bbb;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-bottom: 2px solid #f90;
+      margin-bottom: 14px;
+    }
+
+    .block {
+      background: #3a3a3a;
+      border: 1px solid #505050;
+      border-radius: 4px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .block-title {
+      font-size: 10px;
+      color: #f90;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border-bottom: 1px solid #505050;
+      padding-bottom: 6px;
+      margin-bottom: 10px;
+    }
+
+    .field-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .field-lbl {
+      font-size: 13px;
+      color: #ccc;
+      white-space: nowrap;
+      min-width: 130px;
+    }
+
+    .inp {
+      background: #1e1e1e;
+      border: 2px solid #f90;
+      border-radius: 3px;
+      color: #f90;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 16px;
+      padding: 5px 10px;
+      width: 130px;
+      text-align: center;
+      outline: none;
+    }
+    .inp:focus { border-color: #ffb347; }
+
+    .inp-gray {
+      background: #1e1e1e;
+      border: 2px solid #666;
+      border-radius: 3px;
+      color: #aaa;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 16px;
+      padding: 5px 10px;
+      width: 130px;
+      text-align: center;
+      outline: none;
+    }
+
+    .unit { font-size: 12px; color: #777; }
+
+    .btn-calcular {
+      background: #f90;
+      color: #1a1a1a;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 22px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-left: auto;
+    }
+    .btn-calcular:hover { background: #e08800; }
+    .btn-calcular:active { background: #cc7700; }
+
+    .btn-reset {
+      background: #444;
+      color: #ccc;
+      border: 1px solid #666;
+      border-radius: 4px;
+      padding: 8px 16px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-left: auto;
+    }
+    .btn-reset:hover { background: #555; }
+
+    /* tabela de cortes */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    thead th {
+      background: #2a2a2a;
+      color: #f90;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 7px 6px;
+      text-align: center;
+      border: 1px solid #505050;
+    }
+    tbody td {
+      border: 1px solid #444;
+      padding: 5px 4px;
+      text-align: center;
+    }
+    tbody tr { background: #333; }
+    tbody tr:nth-child(even) { background: #2e2e2e; }
+    .t-num { color: #777; font-size: 12px; }
+    .t-inp {
+      background: #1e1e1e;
+      border: 2px solid #f90;
+      border-radius: 3px;
+      color: #f90;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
+      font-size: 13px;
+      padding: 5px 4px;
+      width: 90%;
+      text-align: center;
+      outline: none;
+    }
+    .t-inp:focus { border-color: #ffb347; }
+    .t-pct {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 3px;
+    }
+
+    /* barra de progresso */
+    .bar-outer {
+      background: #1e1e1e;
+      border: 2px solid #555;
+      border-radius: 4px;
+      height: 36px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .bar-inner {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      min-width: 44px;
+    }
+
+    /* stats */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .stat-box {
+      background: #1e1e1e;
+      border: 1px solid #505050;
+      border-radius: 4px;
+      padding: 8px 10px;
+      text-align: center;
+    }
+    .stat-lbl {
+      font-size: 10px;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 4px;
+    }
+    .stat-val {
+      font-size: 18px;
+      color: #f90;
+    }
+
+    .erro {
+      font-size: 12px;
+      color: #e74c3c;
+      min-height: 16px;
+      margin-top: 6px;
+      letter-spacing: 0.04em;
+    }
+
+    /* totais por linha */
+    .linha-total {
+      font-size: 11px;
+      color: #888;
+      margin-top: 2px;
+    }
+    .linha-total span {
+      color: #f90;
+    }
+  </style>
+</head>
+<body>
+
+<div class="ihm">
+  <div class="ihm-header">SmartCut - SCHNELL BRASIL</div>
+
+  <!-- Medida Total -->
+  <div class="block">
+    <div class="block-title">Medida total da barra (100%)</div>
+    <div class="field-row">
+      <span class="field-lbl">Comprimento</span>
+      <input class="inp" type="number" id="total" placeholder="0000" min="0" />
+      <span class="unit">mm</span>
+    </div>
+  </div>
+
+  <!-- Tabela de cortes -->
+  <div class="block">
+    <div class="block-title">Programação de cortes</div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px;">#</th>
+          <th>Medida do corte (mm)</th>
+          <th>Pos. descarga (mm)</th>
+          <th>Qtd. cortes</th>
+          <th>Total linha</th>
+        </tr>
+      </thead>
+      <tbody id="tbody-cortes">
+        <tr>
+          <td class="t-num">1</td>
+          <td><input class="t-inp" type="number" id="m1" placeholder="0" min="0" oninput="atualizar()" /></td>
+          <td><input class="t-inp" type="number" id="p1" placeholder="0" min="0" /></td>
+          <td><input class="t-inp" type="number" id="q1" placeholder="0" min="0" value="0" oninput="atualizar()" /></td>
+          <td><div class="t-pct" id="tot1">— mm</div></td>
+        </tr>
+        <tr>
+          <td class="t-num">2</td>
+          <td><input class="t-inp" type="number" id="m2" placeholder="0" min="0" oninput="atualizar()" /></td>
+          <td><input class="t-inp" type="number" id="p2" placeholder="0" min="0" /></td>
+          <td><input class="t-inp" type="number" id="q2" placeholder="0" min="0" value="0" oninput="atualizar()" /></td>
+          <td><div class="t-pct" id="tot2">— mm</div></td>
+        </tr>
+        <tr>
+          <td class="t-num">3</td>
+          <td><input class="t-inp" type="number" id="m3" placeholder="0" min="0" oninput="atualizar()" /></td>
+          <td><input class="t-inp" type="number" id="p3" placeholder="0" min="0" /></td>
+          <td><input class="t-inp" type="number" id="q3" placeholder="0" min="0" value="0" oninput="atualizar()" /></td>
+          <td><div class="t-pct" id="tot3">— mm</div></td>
+        </tr>
+        <tr>
+          <td class="t-num">4</td>
+          <td><input class="t-inp" type="number" id="m4" placeholder="0" min="0" oninput="atualizar()" /></td>
+          <td><input class="t-inp" type="number" id="p4" placeholder="0" min="0" /></td>
+          <td><input class="t-inp" type="number" id="q4" placeholder="0" min="0" value="0" oninput="atualizar()" /></td>
+          <td><div class="t-pct" id="tot4">— mm</div></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="erro" id="erro"></div>
+  </div>
+
+  <!-- Resultado -->
+  <div class="block">
+    <div class="block-title" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Aproveitamento da barra</span>
+      <button class="btn-reset" onclick="resetar()">Reset</button>
+    </div>
+
+    <div class="bar-outer">
+      <div class="bar-inner" id="bar-inner" style="width:0%; background:#1D9E75; color:#085041;">0%</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-lbl">Total cortado</div>
+        <div class="stat-val" id="s-cortado">0 mm</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-lbl">Aproveitamento</div>
+        <div class="stat-val" id="s-pct">0%</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-lbl">Sobra</div>
+        <div class="stat-val" id="s-rest">— mm</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function getColor(pct) {
+    if (pct <= 50) return { bg: '#1D9E75', text: '#085041' };
+    if (pct <= 80) return { bg: '#EF9F27', text: '#412402' };
+    return { bg: '#E24B4A', text: '#501313' };
+  }
+
+  function atualizar() {
+    const total = parseFloat(document.getElementById('total').value) || 0;
+    let soma = 0;
+
+    for (let i = 1; i <= 4; i++) {
+      const m = parseFloat(document.getElementById('m' + i).value) || 0;
+      const q = parseInt(document.getElementById('q' + i).value) || 0;
+      const subtotal = m * q;
+      soma += subtotal;
+      const el = document.getElementById('tot' + i);
+      if (m > 0 && q > 0) {
+        el.innerHTML = '<span>' + subtotal.toLocaleString('pt-BR') + ' mm</span>';
+      } else {
+        el.innerHTML = '— mm';
+      }
+    }
+
+    const bar   = document.getElementById('bar-inner');
+    const erro  = document.getElementById('erro');
+
+    if (total <= 0) {
+      bar.style.width = '0%';
+      bar.textContent = '0%';
+      document.getElementById('s-cortado').textContent = soma.toLocaleString('pt-BR') + ' mm';
+      document.getElementById('s-pct').textContent     = '—';
+      document.getElementById('s-rest').textContent    = '— mm';
+      erro.textContent = soma > 0 ? 'Informe o comprimento total da barra.' : '';
+      return;
+    }
+
+    if (soma > total) {
+      erro.textContent = 'ATENÇÃO: cortes excedem o comprimento da barra!';
+    } else {
+      erro.textContent = '';
+    }
+
+    const pct     = Math.min(Math.round((soma / total) * 100), 100);
+    const restante = Math.max(total - soma, 0);
+    const cor     = getColor(pct);
+
+    bar.style.width      = pct + '%';
+    bar.style.background = cor.bg;
+    bar.style.color      = cor.text;
+    bar.textContent      = pct + '%';
+
+    document.getElementById('s-cortado').textContent = soma.toLocaleString('pt-BR') + ' mm';
+    document.getElementById('s-pct').textContent     = pct + '%';
+    document.getElementById('s-rest').textContent    = restante.toLocaleString('pt-BR') + ' mm';
+  }
+
+  function resetar() {
+    ['m1','m2','m3','m4','p1','p2','p3','p4','q1','q2','q3','q4','total'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    for (let i = 1; i <= 4; i++) document.getElementById('tot' + i).innerHTML = '— mm';
+    document.getElementById('bar-inner').style.width = '0%';
+    document.getElementById('bar-inner').textContent = '0%';
+    document.getElementById('s-cortado').textContent = '0 mm';
+    document.getElementById('s-pct').textContent     = '0%';
+    document.getElementById('s-rest').textContent    = '— mm';
+    document.getElementById('erro').textContent      = '';
+  }
+
+  document.getElementById('total').addEventListener('input', atualizar);
+</script>
+
+</body>
+</html>
