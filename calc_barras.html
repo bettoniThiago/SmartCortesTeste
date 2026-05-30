@@ -133,7 +133,6 @@
     }
     .btn-reset:hover { background: #555; }
 
-    /* tabela de cortes */
     table {
       width: 100%;
       border-collapse: collapse;
@@ -176,7 +175,6 @@
       margin-top: 3px;
     }
 
-    /* barra de progresso */
     .bar-outer {
       background: #1e1e1e;
       border: 2px solid #555;
@@ -198,7 +196,6 @@
       min-width: 44px;
     }
 
-    /* stats */
     .stats-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -232,21 +229,28 @@
       letter-spacing: 0.04em;
     }
 
-    /* totais por linha */
-    .linha-total {
+    .btn-pos-corte, .btn-pos-descarga {
+      background: #444;
+      color: #ccc;
+      border: 1px solid #666;
+      border-radius: 4px;
+      padding: 8px 12px;
+      font-family: 'Share Tech Mono', 'Courier New', monospace;
       font-size: 11px;
-      color: #888;
-      margin-top: 2px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
     }
-    .linha-total span {
-      color: #f90;
-    }
+    .btn-pos-corte:hover { background: #f90; color: #1a1a1a; border-color: #f90; }
+    .btn-pos-descarga:hover { background: #f90; color: #1a1a1a; border-color: #f90; }
+    .btn-pos-corte:active, .btn-pos-descarga:active { background: #cc7700; }
   </style>
 </head>
 <body>
 
 <div class="ihm">
-  <div class="ihm-header">SmartCut - SCHNELL BRASIL</div>
+  <div class="ihm-header">Calculadora de Barra — Programação de Cortes</div>
 
   <!-- Medida Total -->
   <div class="block">
@@ -255,6 +259,10 @@
       <span class="field-lbl">Comprimento</span>
       <input class="inp" type="number" id="total" placeholder="0000" min="0" />
       <span class="unit">mm</span>
+      <div style="display:flex; flex-direction:column; gap:6px; margin-left:auto;">
+        <button class="btn-pos-corte">Posicionar medida de corte</button>
+        <button class="btn-pos-descarga">Posicionar medida de descarga</button>
+      </div>
     </div>
   </div>
 
@@ -357,8 +365,8 @@
       }
     }
 
-    const bar   = document.getElementById('bar-inner');
-    const erro  = document.getElementById('erro');
+    const bar  = document.getElementById('bar-inner');
+    const erro = document.getElementById('erro');
 
     if (total <= 0) {
       bar.style.width = '0%';
@@ -376,9 +384,9 @@
       erro.textContent = '';
     }
 
-    const pct     = Math.min(Math.round((soma / total) * 100), 100);
+    const pct      = Math.min(Math.round((soma / total) * 100), 100);
     const restante = Math.max(total - soma, 0);
-    const cor     = getColor(pct);
+    const cor      = getColor(pct);
 
     bar.style.width      = pct + '%';
     bar.style.background = cor.bg;
